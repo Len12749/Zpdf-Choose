@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Upload, FileText, ImageIcon, X, ChevronLeft, Loader2, CheckCircle } from 'lucide-react';
+import { Upload, FileText, ImageIcon, X, ChevronLeft, Loader2, CheckCircle, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
@@ -33,6 +33,14 @@ interface ExtractionProgressState {
   processed: number;
   total: number;
   warnings: string[];
+}
+
+interface ManualQuestionForm {
+  stem: string;
+  options: Array<{ label: string; content: string }>;
+  answer: string;
+  explanation: string;
+  type: 'single' | 'multiple' | 'indefinite';
 }
 
 interface DragState {
@@ -68,6 +76,22 @@ export default function CreateQuestionsPage() {
   const [result, setResult] = useState<ExtractionResultState | null>(null);
   const [zoomItem, setZoomItem] = useState<PreparedUploadItem | null>(null);
   const [dragState, setDragState] = useState<DragState | null>(null);
+  const [importMode, setImportMode] = useState<'auto' | 'manual'>('auto');
+  const [manualQuestions, setManualQuestions] = useState<ManualQuestionForm[]>([
+    {
+      stem: '',
+      options: [
+        { label: 'A', content: '' },
+        { label: 'B', content: '' },
+        { label: 'C', content: '' },
+        { label: 'D', content: '' },
+      ],
+      answer: '',
+      explanation: '',
+      type: 'single',
+    },
+  ]);
+  const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -132,6 +156,128 @@ export default function CreateQuestionsPage() {
       if (removed.preview) URL.revokeObjectURL(removed.preview);
       return prev.filter((_, itemIndex) => itemIndex !== index);
     });
+  };
+
+  const addManualQuestion = () => {
+    setManualQuestions((prev) => [
+      ...prev,
+      {
+        stem: '',
+        options: [
+          { label: 'A', content: '' },
+          { label: 'B', content: '' },
+          { label: 'C', content: '' },
+          { label: 'D', content: '' },
+        ],
+        answer: '',
+        explanation: '',
+        type: 'single',
+      },
+    ]);
+  };
+
+  const removeManualQuestion = (index: number) => {
+    if (manualQuestions.length === 1) {
+      toast('至少保留一道题目', 'error');
+      return;
+    }
+    setManualQuestions((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const updateManualQuestion = (index: number, field: keyof ManualQuestionForm, value: any) => {
+    setManualQuestions((prev) =>
+      prev.map((q, i) => (i === index ? { ...q, [field]: value } : q))
+    );
+  };
+
+  const updateOption = (questionIndex: number, optionIndex: number, value: string) => {
+    setManualQuestions((prev) =>
+      prev.map((q, qi) =>
+        qi === questionIndex
+          ? {
+              ...q,
+              options: q.options.map((opt, oi) =>
+                oi === optionIndex ? { ...opt, content: value } : opt
+              ),
+            }
+          : q
+      )
+    );
+  };
+
+  const validateManualQuestions = (): boolean => {
+    for (let i = 0; i < manualQuestions.length; i++) {
+      const q = manualQuestions[i];
+      if (!q.stem.trim()) {
+        toast(`第 ${i + 1} 道题的题干不能为空`, 'error');
+        return false;
+      }
+      const validOptions = q.options.filter((opt) => opt.content.trim());
+      if (validOptions.length < 2) {
+        toast(`第 ${i + 1} 道题至少需要2个选项`, 'error');
+        return false;
+      }
+      if (!q.answer.trim()) {
+        toast(`第 ${i + 1} 道题的答案不能为空`, 'error');
+        return false;
+      }
+      // 验证答案格式
+      const answerLetters = q.answer.toUpperCase().replace(/\s/g, '').split('');
+      const validLabels = q.options.filter((opt) => opt.content.trim()).map((opt) => opt.label.toUpperCase());
+      for (const letter of answerLetters) {
+        if (!validLabels.includes(letter)) {
+          toast(`第 ${i + 1} 道题的答案包含无效选项字母: ${letter}`, 'error');
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
+  const handleSubmitManualQuestions = async () => {
+    if (!validateManualQuestions()) return;
+
+    setSubmitting(true);
+    try {
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const q of manualQuestions) {
+        const validOptions = q.options.filter((opt) => opt.content.trim());
+        const res = await fetch(`/api/question-bank/${bankId}/question`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            stem: q.stem.trim(),
+            options: validOptions,
+            answer: q.answer.trim().toUpperCase(),
+            explanation: q.explanation.trim(),
+            type: q.type,
+            is_ai_generated: false,
+            ai_flags: [],
+          }),
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          successCount++;
+        } else {
+          failCount++;
+          console.error('题目导入失败:', data.error);
+        }
+      }
+
+      if (successCount > 0) {
+        toast(`成功导入 ${successCount} 道题目${failCount > 0 ? `，${failCount} 道失败` : ''}`, 'success');
+        router.push(`/question-bank/${bankId}`);
+      } else {
+        toast('所有题目导入失败', 'error');
+      }
+    } catch (error) {
+      toast('网络错误，请重试', 'error');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -282,7 +428,33 @@ export default function CreateQuestionsPage() {
       </Link>
 
       <h1 className="text-2xl font-bold text-content-primary mb-2">添加题目</h1>
-      <p className="text-content-secondary mb-8">上传 PDF、文本或图片。当前列表顺序就是 AI 的识别顺序，答案匹配也按这个顺序进行。</p>
+      <p className="text-content-secondary mb-6">上传 PDF、文本或图片，或者手动输入题目内容。</p>
+
+      {/* 导入模式切换 */}
+      <div className="flex gap-2 mb-8">
+        <button
+          onClick={() => setImportMode('auto')}
+          className={cn(
+            'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+            importMode === 'auto'
+              ? 'bg-accent text-white'
+              : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary'
+          )}
+        >
+          自动导入
+        </button>
+        <button
+          onClick={() => setImportMode('manual')}
+          className={cn(
+            'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+            importMode === 'manual'
+              ? 'bg-accent text-white'
+              : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary'
+          )}
+        >
+          手动输入
+        </button>
+      </div>
 
       {result ? (
         <div className="text-center py-16">
@@ -304,6 +476,129 @@ export default function CreateQuestionsPage() {
             <Button onClick={() => router.push(`/question-bank/${bankId}`)}>
               查看题库
             </Button>
+          </div>
+        </div>
+      ) : importMode === 'manual' ? (
+        /* 手动输入模式 */
+        <div className="space-y-6">
+          {manualQuestions.map((question, qIndex) => (
+            <div key={qIndex} className="bg-surface-secondary border border-border rounded-2xl p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-content-primary">第 {qIndex + 1} 道题</h3>
+                <button
+                  onClick={() => removeManualQuestion(qIndex)}
+                  className="p-2 rounded-lg text-content-secondary hover:text-error hover:bg-error/10 transition-colors"
+                  title="删除此题"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* 题干 */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-content-secondary">
+                  题干 <span className="text-error">*</span>
+                </label>
+                <textarea
+                  value={question.stem}
+                  onChange={(e) => updateManualQuestion(qIndex, 'stem', e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 bg-surface-tertiary border border-border rounded-lg text-content-primary placeholder:text-content-secondary/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent resize-none"
+                  placeholder="请输入题目内容..."
+                />
+              </div>
+
+              {/* 选项 */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-content-secondary">
+                  选项 <span className="text-error">*</span>（至少2个）
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {question.options.map((option, oIndex) => (
+                    <div key={oIndex} className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-content-secondary w-6">{option.label}.</span>
+                      <input
+                        type="text"
+                        value={option.content}
+                        onChange={(e) => updateOption(qIndex, oIndex, e.target.value)}
+                        className="flex-1 px-3 py-2 bg-surface-tertiary border border-border rounded-lg text-content-primary placeholder:text-content-secondary/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
+                        placeholder={`选项 ${option.label} 的内容`}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 题型 */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-content-secondary">
+                  题型 <span className="text-error">*</span>
+                </label>
+                <div className="flex gap-4">
+                  {(['single', 'multiple', 'indefinite'] as const).map((type) => (
+                    <label key={type} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name={`type-${qIndex}`}
+                        value={type}
+                        checked={question.type === type}
+                        onChange={() => updateManualQuestion(qIndex, 'type', type)}
+                        className="accent-accent"
+                      />
+                      <span className="text-sm text-content-primary">
+                        {type === 'single' ? '单选' : type === 'multiple' ? '多选' : '不定项'}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* 答案 */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-content-secondary">
+                  答案 <span className="text-error">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={question.answer}
+                  onChange={(e) => updateManualQuestion(qIndex, 'answer', e.target.value)}
+                  className="w-full px-3 py-2 bg-surface-tertiary border border-border rounded-lg text-content-primary placeholder:text-content-secondary/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent"
+                  placeholder={question.type === 'single' ? '如 A' : '如 AC'}
+                />
+                <p className="text-xs text-content-secondary">
+                  {question.type === 'single' ? '单选题只需填写一个字母' : '多选题请填写多个字母，如 AC'}
+                </p>
+              </div>
+
+              {/* 解析 */}
+              <div className="space-y-1.5">
+                <label className="block text-sm font-medium text-content-secondary">
+                  解析
+                </label>
+                <textarea
+                  value={question.explanation}
+                  onChange={(e) => updateManualQuestion(qIndex, 'explanation', e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2 bg-surface-tertiary border border-border rounded-lg text-content-primary placeholder:text-content-secondary/50 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent resize-none"
+                  placeholder="请输入题目解析（可选）..."
+                />
+              </div>
+            </div>
+          ))}
+
+          {/* 操作按钮 */}
+          <div className="flex items-center justify-between gap-4 pt-4">
+            <Button variant="ghost" onClick={addManualQuestion} icon={<Plus className="w-4 h-4" />}>
+              添加题目
+            </Button>
+            <div className="flex gap-3">
+              <Button variant="secondary" onClick={() => router.push(`/question-bank/${bankId}`)}>
+                取消
+              </Button>
+              <Button onClick={handleSubmitManualQuestions} loading={submitting}>
+                批量导入
+              </Button>
+            </div>
           </div>
         </div>
       ) : extracting ? (
