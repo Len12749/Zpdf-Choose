@@ -1,65 +1,66 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { BookOpen, Brain, GraduationCap, Star, AlertCircle } from 'lucide-react';
+
+const features = [
+  {
+    href: '/question-bank',
+    icon: BookOpen,
+    title: '题库管理',
+    description: '创建题库，上传PDF、文本或图片，AI自动识别选择题',
+  },
+  {
+    href: '/quiz',
+    icon: Brain,
+    title: '开始练习',
+    description: '选择题库进行刷题，支持顺序、逆序和乱序模式',
+  },
+  {
+    href: '/study',
+    icon: GraduationCap,
+    title: '背题模式',
+    description: '直接查看题干、答案和解析，上下滑动翻页',
+  },
+  {
+    href: '/favorites',
+    icon: Star,
+    title: '我的收藏',
+    description: '收藏重要题目，随时回顾复习',
+  },
+  {
+    href: '/wrong-answers',
+    icon: AlertCircle,
+    title: '错题本',
+    description: '自动记录错题，标注错误次数，针对性练习',
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="text-center mb-16">
+        <h1 className="text-4xl md:text-5xl font-bold text-content-primary mb-4">
+          <span className="text-accent">Zpdf-Choose</span>
+        </h1>
+        <p className="text-lg text-content-secondary max-w-2xl mx-auto">
+          上传PDF、文本或图片，AI智能识别选择题，打造专属题库，高效刷题备考
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {features.map(({ href, icon: Icon, title, description }) => (
+          <Link
+            key={href}
+            href={href}
+            className="group bg-surface-secondary border border-border rounded-2xl p-6 hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 transition-all duration-300 active:scale-[0.98]"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+            <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors">
+              <Icon className="w-6 h-6 text-accent" />
+            </div>
+            <h2 className="text-lg font-semibold text-content-primary mb-2">{title}</h2>
+            <p className="text-sm text-content-secondary leading-relaxed">{description}</p>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

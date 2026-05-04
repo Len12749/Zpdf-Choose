@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Zpdf-Choose
 
-## Getting Started
+Zpdf-Choose 是一个本地运行的选择题题库系统。它支持上传 PDF、图片和文本材料，调用 SiliconFlow 多模态模型抽取选择题，整理为题库后再进行刷题、背题、收藏和错题复习。
 
-First, run the development server:
+## 功能概览
+
+- 题库管理：创建、编辑、删除题库，支持题库合并
+- 智能导题：上传 PDF / TXT / Markdown / 图片后，自动提取选择题
+- AI 补全：对缺失答案或解析的题目做二次修复
+- 刷题模式：支持顺序、逆序、乱序练习
+- 背题模式：适合快速浏览题干、答案和解析
+- 收藏与错题本：沉淀重点题和薄弱题
+- 本地存储：默认使用 SQLite，数据文件位于 `data/sqlite.db`
+
+## 技术栈
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- better-sqlite3
+- pdfjs-dist
+- SiliconFlow API
+
+## 运行要求
+
+- Node.js 20 及以上
+- npm 10 及以上
+- 可访问 SiliconFlow API
+
+如果是首次在新机器启动，建议先确认本机已经具备 `better-sqlite3` 和 `canvas` 所需的原生编译环境。
+
+## 环境变量配置
+
+项目不会提交本地环境变量。请在根目录创建 `.env.local`，推荐直接从示例文件复制：
+
+```bash
+cp .env.example .env.local
+```
+
+然后按需填写：
+
+```env
+SILICONFLOW_API_KEY=你的_SiliconFlow_API_Key
+SILICONFLOW_API_URL=https://api.siliconflow.cn/v1/chat/completions
+SILICONFLOW_MODEL=Qwen/Qwen3-VL-30B-A3B-Instruct
+```
+
+说明：
+
+- `SILICONFLOW_API_KEY`：必填，用于题目抽取和修复
+- `SILICONFLOW_API_URL`：通常保持默认即可
+- `SILICONFLOW_MODEL`：可替换成你实际使用的视觉模型
+
+未配置这些变量时，依赖 AI 的导题能力无法正常工作。
+
+## 安装依赖
+
+```bash
+npm install
+```
+
+## 启动开发环境
+
+项目默认运行在 `3002` 端口：
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+启动后访问：
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3002
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 生产启动
 
-## Learn More
+```bash
+npm run build
+npm run start
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 数据与目录说明
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `src/app`：页面和 API 路由
+- `src/components`：界面组件
+- `src/lib`：数据库、题目处理、AI 调用等核心逻辑
+- `data/`：SQLite 数据文件目录，运行后自动生成
+- `uploads/temp/`：上传文件临时目录
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`data/`、`uploads/temp/`、`.env.local` 都属于本地运行时数据，已经加入忽略规则，不应提交到 Git。
 
-## Deploy on Vercel
+## 常用开发命令
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 提交与推送前建议
+
+- 确认 `.env.local` 没有被加入暂存区
+- 确认 `data/` 和 `uploads/temp/` 中的本地数据没有被提交
+- 如需分享项目，保留 `.env.example` 作为配置模板即可
