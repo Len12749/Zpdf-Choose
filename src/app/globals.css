@@ -17,30 +17,30 @@
 }
 
 [data-theme="light"] {
-  --bg-primary: #FFFFFF;
-  --bg-secondary: #F5F3FF;
-  --bg-tertiary: #EDE9FE;
-  --text-primary: #1E1B2E;
-  --text-secondary: #6B7280;
-  --accent: #7C3AED;
-  --accent-hover: #6D28D9;
-  --accent-light: #DDD6FE;
-  --border-color: #E5E7EB;
+  --bg-primary: #FBF8F0;
+  --bg-secondary: rgba(255, 252, 245, 0.78);
+  --bg-tertiary: rgba(239, 230, 211, 0.62);
+  --text-primary: #2E2A22;
+  --text-secondary: #776E62;
+  --accent: #9B6A45;
+  --accent-hover: #7D5234;
+  --accent-light: #E6D1BD;
+  --border-color: rgba(94, 72, 49, 0.15);
   --success: #10B981;
   --error: #EF4444;
   --warning: #F59E0B;
 }
 
 [data-theme="dark"] {
-  --bg-primary: #0D0B14;
-  --bg-secondary: #1A1625;
-  --bg-tertiary: #252037;
-  --text-primary: #F0ECF9;
-  --text-secondary: #9CA3AF;
-  --accent: #A78BFA;
-  --accent-hover: #8B5CF6;
-  --accent-light: #3B2F63;
-  --border-color: #2D2640;
+  --bg-primary: #17140F;
+  --bg-secondary: rgba(35, 30, 23, 0.78);
+  --bg-tertiary: rgba(56, 47, 35, 0.72);
+  --text-primary: #F4EEE3;
+  --text-secondary: #B9AA96;
+  --accent: #D5A15D;
+  --accent-hover: #E1B779;
+  --accent-light: #4C3A25;
+  --border-color: rgba(234, 211, 177, 0.14);
   --success: #34D399;
   --error: #F87171;
   --warning: #FBBF24;
@@ -51,10 +51,79 @@
 }
 
 body {
-  background-color: var(--bg-primary);
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(255, 243, 215, 0.86), transparent 30rem),
+    radial-gradient(circle at 82% 14%, rgba(207, 225, 211, 0.44), transparent 28rem),
+    radial-gradient(circle at 65% 88%, rgba(217, 194, 166, 0.38), transparent 34rem),
+    linear-gradient(135deg, #FBF8F0 0%, #F4EDE1 47%, #F9F5EA 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: 140vw 140vh, 130vw 130vh, 150vw 150vh, cover;
   color: var(--text-primary);
   font-family: "Inter", "Noto Sans SC", system-ui, -apple-system, sans-serif;
   transition: background-color 0.2s, color 0.2s;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+body::before {
+  opacity: 0.52;
+  background:
+    radial-gradient(ellipse 58rem 20rem at 16% 72%, rgba(181, 133, 85, 0.11), transparent 68%),
+    radial-gradient(ellipse 44rem 16rem at 87% 36%, rgba(111, 138, 113, 0.12), transparent 70%),
+    repeating-linear-gradient(96deg, rgba(100, 79, 52, 0.034) 0 1px, transparent 1px 9px);
+  background-repeat: no-repeat, no-repeat, repeat;
+  background-size: 120vw 120vh, 110vw 110vh, 220px 220px;
+  filter: blur(0.1px);
+}
+
+body::after {
+  opacity: 0.2;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(66, 50, 32, 0.55) 0 0.55px, transparent 0.75px),
+    radial-gradient(circle at 72% 58%, rgba(255, 255, 255, 0.8) 0 0.65px, transparent 0.95px);
+  background-size: 18px 18px, 29px 29px;
+  mix-blend-mode: multiply;
+}
+
+[data-theme="dark"] body {
+  background:
+    radial-gradient(circle at 18% 8%, rgba(94, 69, 39, 0.34), transparent 30rem),
+    radial-gradient(circle at 82% 14%, rgba(67, 88, 70, 0.28), transparent 28rem),
+    radial-gradient(circle at 65% 88%, rgba(117, 85, 48, 0.22), transparent 34rem),
+    linear-gradient(135deg, #17140F 0%, #211B13 50%, #181610 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: 140vw 140vh, 130vw 130vh, 150vw 150vh, cover;
+}
+
+[data-theme="dark"] body::before {
+  opacity: 0.38;
+  background:
+    radial-gradient(ellipse 58rem 20rem at 16% 72%, rgba(214, 165, 94, 0.09), transparent 68%),
+    radial-gradient(ellipse 44rem 16rem at 87% 36%, rgba(105, 132, 104, 0.1), transparent 70%),
+    repeating-linear-gradient(96deg, rgba(255, 235, 202, 0.028) 0 1px, transparent 1px 9px);
+  background-repeat: no-repeat, no-repeat, repeat;
+  background-size: 120vw 120vh, 110vw 110vh, 220px 220px;
+}
+
+[data-theme="dark"] body::after {
+  opacity: 0.16;
+  mix-blend-mode: screen;
 }
 
 input, textarea, select, button {

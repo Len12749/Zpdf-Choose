@@ -18,7 +18,7 @@ const features = [
     href: '/study',
     icon: GraduationCap,
     title: '背题模式',
-    description: '直接查看题干、答案和解析，上下滑动翻页',
+    description: '直接查看题干、答案和解析，移动端可左右滑动切题',
   },
   {
     href: '/favorites',

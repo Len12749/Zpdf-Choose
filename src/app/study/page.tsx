@@ -50,7 +50,7 @@ export default function StudyPage() {
           <GraduationCap className="w-8 h-8 text-accent" />
         </div>
         <h1 className="text-2xl font-bold text-content-primary mb-2">背题模式</h1>
-        <p className="text-content-secondary">直接查看答案和解析，上下滑动翻页</p>
+        <p className="text-content-secondary">直接查看答案和解析，移动端可左右滑动切题</p>
       </div>
 
       <div className="space-y-6">

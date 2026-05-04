@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Menu, X, BookOpen, Brain, GraduationCap, Star, AlertCircle, Home } from 'lucide-react';
+import { Menu, X, BookOpen, Brain, GraduationCap, Star, AlertCircle, Home, Info } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +14,7 @@ const navItems = [
   { href: '/study', label: '背题', icon: GraduationCap },
   { href: '/favorites', label: '收藏', icon: Star },
   { href: '/wrong-answers', label: '错题', icon: AlertCircle },
+  { href: '/about', label: '关于我们', icon: Info },
 ];
 
 export function Header() {

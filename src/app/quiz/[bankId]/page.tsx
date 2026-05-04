@@ -250,11 +250,6 @@ export default function QuizSessionPage() {
           <p className="text-content-secondary leading-relaxed whitespace-pre-wrap">
             {currentQuestion.explanation}
           </p>
-          {currentQuestion.ai_flags.length > 0 && (
-            <p className="text-xs text-content-secondary mt-3">
-              AI标记：{currentQuestion.ai_flags.join('、')}
-            </p>
-          )}
         </div>
       )}
 
