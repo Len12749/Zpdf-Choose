@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BookOpen, Brain, GraduationCap, Star, AlertCircle } from 'lucide-react';
+import { BookOpen, Brain, GraduationCap, Star, AlertCircle, Info } from 'lucide-react';
 
 const features = [
   {
@@ -31,6 +31,12 @@ const features = [
     icon: AlertCircle,
     title: '错题本',
     description: '自动记录错题，标注错误次数，针对性练习',
+  },
+  {
+    href: '/about',
+    icon: Info,
+    title: '关于我们',
+    description: '了解开源声明、公司信息与知译 Zpdf 产品介绍',
   },
 ];
 
