@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { Suspense, useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Star, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
@@ -11,7 +11,7 @@ import { hasAnswerAiFlags, hasExplanationAiFlags, hasOptionAiFlags, hasQuestionL
 
 type GestureLock = 'horizontal' | 'vertical' | null;
 
-export default function StudySessionPage() {
+function StudySessionPageInner() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -325,5 +325,18 @@ export default function StudySessionPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function StudySessionPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+        <div className="animate-spin w-12 h-12 border-4 border-accent border-t-transparent rounded-full mx-auto" />
+        <p className="text-content-secondary mt-4">加载中...</p>
+      </div>
+    }>
+      <StudySessionPageInner />
+    </Suspense>
   );
 }

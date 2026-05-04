@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { CheckCircle, XCircle, ArrowRight, RotateCcw, Home, Star } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
@@ -11,7 +11,7 @@ import { Question } from '@/types/question';
 import { cn } from '@/lib/utils';
 import { hasAnswerAiFlags, hasExplanationAiFlags, hasOptionAiFlags, hasQuestionLevelAiFlags } from '@/lib/ai-flags';
 
-export default function QuizSessionPage() {
+function QuizSessionPageInner() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -265,5 +265,18 @@ export default function QuizSessionPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function QuizSessionPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-2xl mx-auto px-4 py-16 text-center">
+        <div className="animate-spin w-12 h-12 border-4 border-accent border-t-transparent rounded-full mx-auto" />
+        <p className="text-content-secondary mt-4">加载题目中...</p>
+      </div>
+    }>
+      <QuizSessionPageInner />
+    </Suspense>
   );
 }

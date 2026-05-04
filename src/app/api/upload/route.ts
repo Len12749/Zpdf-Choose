@@ -1,9 +1,9 @@
-export const dynamic = "force-dynamic";
-
 import { success, error } from '@/lib/api-response';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
+
+export const dynamic = "force-dynamic";
 
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'temp');
 const MAX_FILE_SIZE = 50 * 1024 * 1024;

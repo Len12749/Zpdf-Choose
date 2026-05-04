@@ -75,9 +75,11 @@ body::after {
   z-index: 0;
 }
 
-body > * {
-  position: relative;
-  z-index: 1;
+@layer base {
+  body > * {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 body::before {
@@ -145,4 +147,15 @@ input, textarea, select, button {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }

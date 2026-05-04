@@ -1,9 +1,9 @@
-export const dynamic = "force-dynamic";
-
 import { db } from '@/lib/db';
 import { success, error } from '@/lib/api-response';
 import { normalizeBankQuestionNumbers } from '@/lib/question-utils';
 import { QuestionBankRow } from '@/types/database';
+
+export const dynamic = "force-dynamic";
 
 export async function POST(
   request: Request,

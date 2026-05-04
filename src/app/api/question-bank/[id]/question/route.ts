@@ -1,9 +1,9 @@
-export const dynamic = "force-dynamic";
-
 import { db } from '@/lib/db';
 import { success, error } from '@/lib/api-response';
 import { QuestionRow } from '@/types/database';
 import { normalizeAnswer, parseAiFlags, parseQuestionRow } from '@/lib/question-utils';
+
+export const dynamic = "force-dynamic";
 
 export async function GET(
   request: Request,

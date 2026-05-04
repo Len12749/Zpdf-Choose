@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-
 import { success, error } from '@/lib/api-response';
 import { db } from '@/lib/db';
 import { extractQuestionsFromImage, extractQuestionsFromText, repairIncompleteQuestions } from '@/lib/siliconflow';
@@ -9,6 +7,8 @@ import { ExtractionResult } from '@/types/question';
 import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
+
+export const dynamic = "force-dynamic";
 
 const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'temp');
 const EXTRACTION_LOG_PREFIX = '[extract]';
