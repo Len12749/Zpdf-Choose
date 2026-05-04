@@ -91,17 +91,5 @@ npm run start
 
 `data/`、`uploads/temp/`、`.env.local` 都属于本地运行时数据，已经加入忽略规则，不应提交到 Git。
 
-## 常用开发命令
-
-```bash
-npm run dev
-npm run build
-npm run start
-npm run lint
-```
-
-## 提交与推送前建议
-
-- 确认 `.env.local` 没有被加入暂存区
-- 确认 `data/` 和 `uploads/temp/` 中的本地数据没有被提交
-- 如需分享项目，保留 `.env.example` 作为配置模板即可
+## 版权
+本项目归北京智通明识科技有限公司所有，任何人不得商用及倒卖。
