@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { AlertCircle, ChevronDown, ChevronUp, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { useToast } from '@/components/ui/Toast';
+import { fetchPageData } from '@/lib/page-api';
 import { Question } from '@/types/question';
 import { cn } from '@/lib/utils';
 import { hasAnswerAiFlags, hasExplanationAiFlags, hasOptionAiFlags, hasQuestionLevelAiFlags } from '@/lib/ai-flags';
@@ -21,18 +22,12 @@ export default function WrongAnswersPage() {
 
   useEffect(() => {
     const load = async () => {
-      try {
-        const res = await fetch('/api/wrong-answer');
-        const data = await res.json();
-        if (data.success) setWrongQuestions(data.data);
-      } catch {
-        toast('加载错题失败', 'error');
-      } finally {
-        setLoading(false);
-      }
+      const data = await fetchPageData<WrongQuestion[]>('/api/wrong-answer');
+      setWrongQuestions(data || []);
+      setLoading(false);
     };
     void load();
-  }, [toast]);
+  }, []);
 
   const toggleFavorite = async (questionId: number, bankId: number) => {
     const res = await fetch('/api/favorite', {

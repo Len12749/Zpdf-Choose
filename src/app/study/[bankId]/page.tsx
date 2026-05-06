@@ -8,6 +8,8 @@ import { useToast } from '@/components/ui/Toast';
 import { Question } from '@/types/question';
 import { cn } from '@/lib/utils';
 import { hasAnswerAiFlags, hasExplanationAiFlags, hasOptionAiFlags, hasQuestionLevelAiFlags } from '@/lib/ai-flags';
+import { fetchPageData } from '@/lib/page-api';
+import { QuestionBankRow } from '@/types/database';
 
 type GestureLock = 'horizontal' | 'vertical' | null;
 
@@ -36,32 +38,25 @@ function StudySessionPageInner() {
 
   useEffect(() => {
     const load = async () => {
-      try {
-        const bankRes = await fetch(`/api/question-bank/${bankId}`);
-        const bankData = await bankRes.json();
-        if (bankData.success) setBankName(bankData.data.name);
+      const bankData = await fetchPageData<QuestionBankRow & { question_count: number }>(`/api/question-bank/${bankId}`);
+      if (bankData) {
+        setBankName(bankData.name);
+      }
 
-        const qRes = await fetch(`/api/question-bank/${bankId}/question?limit=9999`);
-        const qData = await qRes.json();
-        if (!qData.success || qData.data.questions.length === 0) {
-          toast('该题库没有题目', 'error');
-          router.push('/study');
-          return;
-        }
-
-        let qs: Question[] = qData.data.questions;
+      const questionData = await fetchPageData<{ questions: Question[]; total: number }>(`/api/question-bank/${bankId}/question?limit=9999`);
+      if (questionData?.questions?.length) {
+        let qs: Question[] = questionData.questions;
         if (order === 'desc') qs = [...qs].reverse();
         if (order === 'random') qs = [...qs].sort(() => Math.random() - 0.5);
-
         setQuestions(qs);
-      } catch {
-        toast('加载失败', 'error');
-      } finally {
-        setLoading(false);
+      } else {
+        setQuestions([]);
       }
+
+      setLoading(false);
     };
-    load();
-  }, [bankId, order, router, toast]);
+    void load();
+  }, [bankId, order]);
 
   const currentQuestion = questions[currentIndex];
   const prevQuestion = questions[currentIndex - 1];

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { useToast } from '@/components/ui/Toast';
+import { fetchPageData } from '@/lib/page-api';
 import { QuestionBankRow } from '@/types/database';
 
 type OrderType = 'asc' | 'desc' | 'random';
@@ -26,14 +27,13 @@ export default function QuizPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/question-bank')
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.success) setBanks(data.data.filter((b: QuestionBankRow & { question_count: number }) => b.question_count > 0));
-      })
-      .catch(() => toast('加载题库失败', 'error'))
-      .finally(() => setLoading(false));
-  }, [toast]);
+    const load = async () => {
+      const data = await fetchPageData<(QuestionBankRow & { question_count: number })[]>('/api/question-bank');
+      setBanks((data || []).filter((b) => b.question_count > 0));
+      setLoading(false);
+    };
+    void load();
+  }, []);
 
   const handleStart = () => {
     if (!selectedBank) {

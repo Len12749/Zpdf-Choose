@@ -5,6 +5,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Input, Textarea } from '@/components/ui/Input';
 import { useToast } from '@/components/ui/Toast';
+import { fetchPageData } from '@/lib/page-api';
 import { QuestionBankRow } from '@/types/database';
 
 interface BankMergeDialogProps {
@@ -25,13 +26,11 @@ export function BankMergeDialog({ open, onClose, onSuccess, targetBank }: BankMe
 
   useEffect(() => {
     if (open) {
-      fetch('/api/question-bank')
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.success) {
-            setBanks(data.data.filter((b: QuestionBankRow) => b.id !== targetBank?.id));
-          }
-        });
+      const load = async () => {
+        const data = await fetchPageData<(QuestionBankRow & { question_count: number })[]>('/api/question-bank');
+        setBanks((data || []).filter((b) => b.id !== targetBank?.id));
+      };
+      void load();
     }
   }, [open, targetBank]);
 

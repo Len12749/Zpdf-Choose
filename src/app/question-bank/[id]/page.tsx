@@ -14,6 +14,7 @@ import { Question, QuestionType } from '@/types/question';
 import { QuestionBankRow } from '@/types/database';
 import { hasAnswerAiFlags, hasExplanationAiFlags, hasOptionAiFlags, hasQuestionLevelAiFlags } from '@/lib/ai-flags';
 import { cn } from '@/lib/utils';
+import { fetchPageData } from '@/lib/page-api';
 
 export default function BankDetailPage() {
   const params = useParams();
@@ -63,9 +64,8 @@ export default function BankDetailPage() {
   };
 
   const fetchBank = useCallback(async () => {
-    const res = await fetch(`/api/question-bank/${bankId}`);
-    const data = await res.json();
-    if (data.success) setBank(data.data);
+    const data = await fetchPageData<QuestionBankRow & { question_count: number }>(`/api/question-bank/${bankId}`);
+    setBank(data);
   }, [bankId]);
 
   const fetchQuestions = useCallback(async () => {
@@ -78,12 +78,9 @@ export default function BankDetailPage() {
         params.set('search', search);
       }
     }
-    const res = await fetch(`/api/question-bank/${bankId}/question?${params}`);
-    const data = await res.json();
-    if (data.success) {
-      setQuestions(data.data.questions);
-      setTotal(data.data.total);
-    }
+    const data = await fetchPageData<{ questions: Question[]; total: number }>(`/api/question-bank/${bankId}/question?${params}`);
+    setQuestions(data?.questions || []);
+    setTotal(data?.total || 0);
     setLoading(false);
   }, [bankId, page, search]);
 

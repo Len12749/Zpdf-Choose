@@ -7,6 +7,7 @@ import { BankCard } from '@/components/bank/BankCard';
 import { BankForm } from '@/components/bank/BankForm';
 import { BankMergeDialog } from '@/components/bank/BankMergeDialog';
 import { useToast } from '@/components/ui/Toast';
+import { fetchPageData } from '@/lib/page-api';
 import { QuestionBankRow } from '@/types/database';
 
 export default function QuestionBankPage() {
@@ -19,16 +20,10 @@ export default function QuestionBankPage() {
   const { toast } = useToast();
 
   const fetchBanks = useCallback(async () => {
-    try {
-      const res = await fetch('/api/question-bank');
-      const data = await res.json();
-      if (data.success) setBanks(data.data);
-    } catch {
-      toast('加载题库失败', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
+    const data = await fetchPageData<(QuestionBankRow & { question_count: number })[]>('/api/question-bank');
+    setBanks(data || []);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     const run = async () => {

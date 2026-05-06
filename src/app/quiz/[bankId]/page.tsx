@@ -10,6 +10,8 @@ import { useToast } from '@/components/ui/Toast';
 import { Question } from '@/types/question';
 import { cn } from '@/lib/utils';
 import { hasAnswerAiFlags, hasExplanationAiFlags, hasOptionAiFlags, hasQuestionLevelAiFlags } from '@/lib/ai-flags';
+import { fetchPageData } from '@/lib/page-api';
+import { QuestionBankRow } from '@/types/database';
 
 function QuizSessionPageInner() {
   const params = useParams();
@@ -34,33 +36,29 @@ function QuizSessionPageInner() {
 
   const [bankName, setBankName] = useState('');
   const [favoriteOverrides, setFavoriteOverrides] = useState<Record<number, boolean>>({});
+  const [loadFailed, setLoadFailed] = useState(false);
 
   useEffect(() => {
     const load = async () => {
-      try {
-        const bankRes = await fetch(`/api/question-bank/${bankId}`);
-        const bankData = await bankRes.json();
-        if (bankData.success) setBankName(bankData.data.name);
-
-        const qRes = await fetch(`/api/question-bank/${bankId}/question?limit=9999`);
-        const qData = await qRes.json();
-        if (!qData.success || qData.data.questions.length === 0) {
-          toast('该题库没有题目', 'error');
-          router.push('/quiz');
-          return;
-        }
-
-        let questions: Question[] = qData.data.questions;
-        if (order === 'desc') questions = [...questions].reverse();
-        if (order === 'random') questions = [...questions].sort(() => Math.random() - 0.5);
-
-        loadQuestions(questions);
-      } catch {
-        toast('加载失败', 'error');
+      const bankData = await fetchPageData<QuestionBankRow & { question_count: number }>(`/api/question-bank/${bankId}`);
+      if (bankData) {
+        setBankName(bankData.name);
       }
+
+      const questionData = await fetchPageData<{ questions: Question[]; total: number }>(`/api/question-bank/${bankId}/question?limit=9999`);
+      if (!questionData || questionData.questions.length === 0) {
+        setLoadFailed(true);
+        return;
+      }
+
+      let questions: Question[] = questionData.questions;
+      if (order === 'desc') questions = [...questions].reverse();
+      if (order === 'random') questions = [...questions].sort(() => Math.random() - 0.5);
+
+      loadQuestions(questions);
     };
-    load();
-  }, [bankId, order, loadQuestions, router, toast]);
+    void load();
+  }, [bankId, order, loadQuestions]);
 
   const handleConfirm = async () => {
     confirm();
@@ -103,6 +101,8 @@ function QuizSessionPageInner() {
   };
 
   if (state.status === 'loading') {
+    if (loadFailed) return null;
+
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
         <div className="animate-spin w-12 h-12 border-4 border-accent border-t-transparent rounded-full mx-auto" />

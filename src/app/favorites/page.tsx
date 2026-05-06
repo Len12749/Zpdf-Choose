@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Star, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { useToast } from '@/components/ui/Toast';
+import { fetchPageData } from '@/lib/page-api';
 import { Question } from '@/types/question';
 import { cn } from '@/lib/utils';
 import { hasAnswerAiFlags, hasExplanationAiFlags, hasOptionAiFlags, hasQuestionLevelAiFlags } from '@/lib/ai-flags';
@@ -15,16 +16,10 @@ export default function FavoritesPage() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const fetchFavorites = useCallback(async () => {
-    try {
-      const res = await fetch('/api/favorite');
-      const data = await res.json();
-      if (data.success) setFavorites(data.data);
-    } catch {
-      toast('加载收藏失败', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
+    const data = await fetchPageData<Question[]>('/api/favorite');
+    setFavorites(data || []);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     const run = async () => {
